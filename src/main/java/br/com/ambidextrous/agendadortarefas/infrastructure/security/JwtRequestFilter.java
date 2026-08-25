@@ -29,6 +29,8 @@ public class JwtRequestFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws ServletException, IOException {
 
+        System.out.println("Filtro executado");
+
         // Obtém o valor do header "Authorization" da requisição
         final String authorizationHeader = request.getHeader("Authorization");
 
@@ -41,8 +43,16 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 
             // Se o nome de usuário não for nulo e o usuário não estiver autenticado ainda
             if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+
+                System.out.println("Username = " + username);
+
                 // Carrega os detalhes do usuário a partir do nome de usuário
-                UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+                 UserDetails userDetails = userDetailsService.carregaDadosUsuario(username, token);
+
+                boolean valido = jwtUtil.validateToken(token, username);
+
+                System.out.println("Token valido: " + valido);
+
                 // Valida o token JWT
                 if (jwtUtil.validateToken(token, username)) {
                     // Cria um objeto de autenticação com as informações do usuário
@@ -50,6 +60,8 @@ public class JwtRequestFilter extends OncePerRequestFilter {
                             userDetails, null, userDetails.getAuthorities());
                     // Define a autenticação no contexto de segurança
                     SecurityContextHolder.getContext().setAuthentication(authentication);
+
+                    System.out.println("Auth setada = " + SecurityContextHolder.getContext().getAuthentication());
                 }
             }
         }
